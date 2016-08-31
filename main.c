@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 // Número de nodos
-#define NODES	7
+#define NODES	30
 
 const char names[] = {'A', 'B', 'C', 'D', 'E',
 					'F', 'G', 'H', 'I', 'J',
@@ -83,7 +83,7 @@ int dequeue(Queue** front, Queue** end){
 	return tmp;	
 }
 
-int count_presreq(int matrix[NODES][NODES], int *pres, int nodes){
+int count_presreq(int nodes, int matrix[nodes][nodes], int *pres){
 	// Cuenta los prerrequisitos
 	// de cada nodo
 
@@ -106,16 +106,21 @@ int count_presreq(int matrix[NODES][NODES], int *pres, int nodes){
 	return flag;
 }
 
-void topo_order(int matrix[NODES][NODES], int* pres, int nodes, Queue** _front, Queue** _end){
+void topo_order(int nodes, int matrix[nodes][nodes], int* pres, Queue** _front, Queue** _end){
+	// revisar error de segmentación
+	// revisar error de segmentación
+	// revisar error de segmentación
+	// revisar error de segmentación
 
 	Queue* front = *_front;
 	Queue* end = *_end;
 	int i, j, flag, flag2 = 0;
 
 	// Regresa 0 si no hay prerequisitos
-	flag = count_presreq(matrix, pres, NODES);
+	flag = count_presreq(nodes, matrix, pres);
+	
 
-	for (i = 0; i < NODES; ++i){
+	for (i = 0; i < nodes; ++i){
 		if (pres[i] == 0){
 
 			// Se eliminan las conecciones del padre
@@ -131,7 +136,7 @@ void topo_order(int matrix[NODES][NODES], int* pres, int nodes, Queue** _front, 
 	}
 
 	// cuenta los nodos con prerrequisitos
-	if (flag2 >= NODES) return;
+	if (flag2 >= nodes) return;
 
 
 	int index = dequeue(&front, &end);
@@ -153,14 +158,27 @@ void topo_order(int matrix[NODES][NODES], int* pres, int nodes, Queue** _front, 
 	} while (index > 0);
 
 
-	topo_order(matrix, pres, NODES, &front, &end);
+	topo_order(nodes, matrix, pres, &front, &end);
 }
+
+
+void greeting(){
+	printf("=============================================\n");
+	printf("\tOrdenamiento topológico\n");
+	printf("=============================================\n");
+}
+
 
 int main(int argc, char const *argv[])
 {
 
+	greeting();
+
+	int nodes, i, j;
+	scanf("%d", &nodes);
+
 	// matriz de adyacencia
-	int matrix[NODES][NODES] = {
+	int matrix[nodes][nodes] /*= {
 		{0, 1, 1, 1, 0, 0, 1},
 		{0, 0, 1, 0, 0, 0, 0},
 		{0, 0, 0, 0, 1, 1, 0},
@@ -168,29 +186,34 @@ int main(int argc, char const *argv[])
 		{0, 0, 0, 0, 0, 0, 1},
 		{0, 0, 0, 0, 1, 0, 1},
 		{0, 0, 0, 0, 0, 0, 0}
-	};
+	}*/;
 
 	// vector de pre-requisitos
-	int pres[NODES];
-	int i;
+	int pres[nodes];
+
+	for (i = 0; i < nodes; ++i)
+		for (j = 0; j < nodes; ++j)
+			scanf("%d", &matrix[i][j]);
+	
 
 	// apuntadores de la cola
 	Queue* front = NULL;
 	Queue* end = NULL;
 
-	topo_order(matrix, pres, NODES, &front, &end);
+	topo_order(nodes, matrix, pres, &front, &end);
 
-	if (out_names_counter >= NODES)
+	if (out_names_counter >= nodes)
 	{
 		
-		for (i = 0; i < NODES; ++i) printf("%c, ", out_names[i]);
+		for (i = 0; i < nodes; ++i) printf("%c, ", out_names[i]);
 		
 		printf("\n");
 
 	}else{
-		printf("Grafo cíclico\n");
+		printf("Error: Grafo cíclico\n");
 	}
 
+	printf("=============================================\n");
 
 	return 0;
 }
