@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 // Número de nodos
 #define NODES	30
@@ -168,6 +169,70 @@ void greeting(){
 	printf("=============================================\n");
 }
 
+void save_latex(int nodes, int matrix[nodes][nodes]){
+	FILE *txt = fopen("main.tex", "aw");
+
+	if (txt == NULL)
+	{
+		printf("Error al cargar archivo tex\n");
+		return;
+	}
+	/*
+	* A partir de la matriz de adyacencia se genera código latex 
+	* para generar los grafos de manera visual
+	*/
+	// ponemos el preambulo al archivo de latex
+	fprintf(txt, "\\documentclass[12pt,letterpaper]{article} \\usepackage[utf8]{inputenc} \\usepackage[spanish]{babel} \\usepackage{tikz} \\author{Jesús A . Mejía de Dios} \\begin{document}\n");
+	fprintf(txt, "\\centering \\begin{tabular}{|c|} \\hline\n");
+	fprintf(txt, "\\begin{tikzpicture}[scale=1.3, transform shape]\n");
+	fprintf(txt, "\\tikzstyle{every node} = [circle, fill=green!30]\n");
+
+	int i, j;
+
+	// colocamos cada nodo en la circunferencia de radio sqrt(nodes)
+	float rad = sqrt(nodes), t;
+	for (i = 0; i < nodes; ++i) {
+		t = 2*3.1416*i/nodes;
+		fprintf(txt, "\\node (%c) at ( %.2f, %.2f)  {%c}; \n", names[i], rad*cos(t), rad*sin(t), names[i] );
+	}
+
+	// Generamos cada arco
+	for (int i = 0; i < nodes; ++i)
+	{
+		for (int j = 0; j < nodes; ++j)
+		{
+			if (matrix[i][j] != 0){
+				fprintf(txt, "\\draw[<-, color=black] (%c) -- (%c);\n", names[j], names[i]);
+			}
+		}
+	}
+
+
+	fprintf(txt, "\\end{tikzpicture}\\\\ \n ");
+	fprintf(txt, "\\hline\n\\end{tabular} % \n \\\\");
+	fprintf(txt, "\\LARGE Ordenamiento: ");
+
+	if (out_names_counter >= nodes)
+	{
+		
+		for (i = 0; i < nodes; ++i) fprintf(txt, "%c, ", out_names[i]);
+		
+		fprintf(txt , "\n");
+
+	}else{
+		fprintf(txt, "\\\\Error: Grafo cíclico\n");
+	}
+
+	fprintf(txt, "\n\\end{document}\n");
+
+
+	fclose(txt);
+
+	system("latexmk -C && latexmk -pdf && exo-open main.pdf");	
+	system("rm main.tex");	
+
+}
+
 
 int main(int argc, char const *argv[])
 {
@@ -178,7 +243,7 @@ int main(int argc, char const *argv[])
 	scanf("%d", &nodes);
 
 	// matriz de adyacencia
-	int matrix[nodes][nodes] /*= {
+	int matrix[nodes][nodes], tmp[nodes][nodes] /*= {
 		{0, 1, 1, 1, 0, 0, 1},
 		{0, 0, 1, 0, 0, 0, 0},
 		{0, 0, 0, 0, 1, 1, 0},
@@ -192,26 +257,20 @@ int main(int argc, char const *argv[])
 	int pres[nodes];
 
 	for (i = 0; i < nodes; ++i)
-		for (j = 0; j < nodes; ++j)
+		for (j = 0; j < nodes; ++j){
 			scanf("%d", &matrix[i][j]);
+			tmp[i][j]= matrix[i][j];
+		}
 	
 
 	// apuntadores de la cola
 	Queue* front = NULL;
 	Queue* end = NULL;
 
+
 	topo_order(nodes, matrix, pres, &front, &end);
 
-	if (out_names_counter >= nodes)
-	{
-		
-		for (i = 0; i < nodes; ++i) printf("%c, ", out_names[i]);
-		
-		printf("\n");
-
-	}else{
-		printf("Error: Grafo cíclico\n");
-	}
+	save_latex(nodes, tmp);
 
 	printf("=============================================\n");
 
